@@ -1,31 +1,45 @@
 #!/bin/bash
-if [ $# -lt 2 ]
+window=10
+min_intensity=20
+if [ $# -lt 1 ]
 then
+	echo "Using default values for window (10) & minimum intensity(20)"
 	echo "usage: $0 <window> <minimum intensity>"
-	exit 1
+elif [ $# -lt 2 ]
+then
+	echo "Using default value for minimum intensity(20)"
+else
+	window=$1
+	min_intensity=$2
 fi
 echo -n "Building code..."
 g++ -fopenmp -std=c++11 Asgn2.cpp -o hist
 out=$?
 if [ $out -ne 0 ]
 then 
+	echo "Build failed. Exiting."
 	exit $out
 fi
 echo "Done."
-
-
-if [ $out -eq 0 ] 
+echo "Generating histogram..."
+./hist Julia_IIM_6_circle.pgm $window $min_intensity
+out=$?
+if [ $out -ne 0 ]
 then
-	echo  "Generating histogram..."
-	./hist Julia_IIM_6_circle.pgm $1 $2 
-	out=$?
+	echo "Histogram generation failed. Exiting."
+	exit $out
+else
 	echo "Done."
 fi
-
-if [ $out -eq 0 ] 
+echo -n "Generating graph..."
+python graph.py
+out=$?
+if [ $out -ne 0 ]
 then
-	echo -n "Generating graph..."
-	python graph.py
+	echo "[ Fail ]"
+	echo "Exiting."
+	exit $out
+else
 	echo "Done."
 fi
 
