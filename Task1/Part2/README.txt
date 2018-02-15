@@ -1,2 +1,2 @@
 Make script.sh executable.
-Run ./script.sh <window size> <minimum intensity>
+Run ./script.sh [window size] [minimum intensity]

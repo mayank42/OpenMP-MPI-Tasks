@@ -4,7 +4,7 @@ min_intensity=20
 if [ $# -lt 1 ]
 then
 	echo "Using default values for window (10) & minimum intensity(20)"
-	echo "usage: $0 <window> <minimum intensity>"
+	echo "usage: $0 [window] [minimum intensity]"
 elif [ $# -lt 2 ]
 then
 	echo "Using default value for minimum intensity(20)"
