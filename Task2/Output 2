@@ -1,0 +1,42 @@
+[13MA20052@orc-cluster Task2]$ ./script.sh 
+Find specifications in specifications.txt
+Building code   :
+g++ pathGen.cpp -fopenmp -o Sim
+-------------------------------------------------------
+Simulating with 16 threads.
+./Sim 16
+Percentage finished: 100.00(720000/720000)
+Total time elapsed   :   8016
+-------------------------------------------------------
+Simulating with 24 threads.
+./Sim 24
+Percentage finished: 100.00(720000/720000)
+Total time elapsed   :   6231
+-------------------------------------------------------
+Simulating with 32 threads.
+./Sim 32
+Percentage finished: 100.00(720000/720000)
+Total time elapsed   :   6238
+-------------------------------------------------------
+Simulating with 40 threads.
+./Sim 40
+Percentage finished: 100.00(720000/720000)
+Total time elapsed   :   5806
+-------------------------------------------------------
+Simulating with 48 threads.
+./Sim 48
+Percentage finished: 100.00(720000/720000)
+Total time elapsed   :   5628
+-------------------------------------------------------
+Simulating with 60 threads.
+./Sim 60
+Percentage finished: 100.00(720000/720000)
+Total time elapsed   :   6304
+-------------------------------------------------------
+Simulating with 96 threads.
+./Sim 96
+Percentage finished: 100.00(720000/720000)
+Total time elapsed   :   6835
+-------------------------------------------------------
+Cleaning up   :
+rm -rf Sim	
