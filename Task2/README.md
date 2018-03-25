@@ -1,5 +1,5 @@
 ## Description
-This is part of an experiment with optimizing OpenMP program on solving the N-body problem.
+This is part of an experiment with optimizing OpenMP program on solving the N-body problem. The specifications of the system on which this is run is given in specifications.txt. Standard outputs can be found in Output folder.
 
 ### The workflow
 
