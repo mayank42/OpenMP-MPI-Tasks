@@ -1,8 +1,11 @@
-simulation: sim.hpp pathGen.cpp
-	g++ pathGen.cpp -fopenmp -o Sim
+simulation: include/sim.hpp src/pathGen.cpp
+	g++ -c -I include/ src/pathGen.cpp -o build/Sim.o
+	g++ build/Sim.o -fopenmp -o bin/Sim
 
 run:
-	./Sim $(THREADS)
+	bin/./Sim $(THREADS)
 
 clean:
-	rm -rf Sim	
+	rm -rf build/*
+	rm -rf bin/*
+	
