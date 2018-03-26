@@ -23,9 +23,10 @@ build/$(VERSION)/Sim.o: include/sim.hpp src/$(VERSION)/pathGen.cpp
 	$(CC) $(CFLAGS) -Iinclude/ -c -fopenmp src/$(VERSION)/pathGen.cpp -o build/$(VERSION)/Sim.o
 
 run:
+	@mkdir log/$(VERSION)
 	bin/$(VERSION)/./$(TARGET) $(THREADS)
 
 clean:
 	rm -rf build/*
 	rm -rf bin/*
-	rm -rf log/$(VERSION)/*
+	rm -rf log/$(VERSION)

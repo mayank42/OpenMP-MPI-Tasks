@@ -1,4 +1,5 @@
 #include "sim.hpp"
+#define VERSION "v0.0"
 static long perf_event_open(struct perf_event_attr *hw_event, pid_t pid,int cpu, int group_fd, unsigned long flags){
 	int ret;
         ret = syscall(__NR_perf_event_open, hw_event, pid, cpu,group_fd, flags);
@@ -23,7 +24,7 @@ int main(int argc,char **argv){
 	cout<<fixed<<setprecision(2);
 	
 	stringstream traj;
-	traj<<"./log/trajectory_"<<num_threads<<".csv";
+	traj<<"./log/"<<VERSION<<"/trajectory_"<<num_threads<<".csv";
 	ofstream trajFile(traj.str().c_str());
 	if(!trajFile.is_open()){
 		cout<<"Unable to open file. Exiting."<<endl;
@@ -31,7 +32,7 @@ int main(int argc,char **argv){
 	}
 	
 	stringstream tlog;
-	tlog<<"./log/timeLog_"<<num_threads<<".csv";
+	tlog<<"./log/"<<VERSION<<"/timeLog_"<<num_threads<<".csv";
 	ofstream timeLog(tlog.str().c_str());
 	if(!timeLog.is_open()){
 		cout<<"Unable to open time log. Exiting."<<endl;
@@ -40,7 +41,7 @@ int main(int argc,char **argv){
 	}
 	
 	stringstream pLog;
-	pLog<<"./log/perfLog_"<<num_threads<<".csv";
+	pLog<<"./log/"<<VERSION<<"/perfLog_"<<num_threads<<".csv";
 	ofstream perfLog(pLog.str().c_str());
 	if(!perfLog.is_open()){
 		cout<<"Unable to open perf log. Exiting."<<endl;
