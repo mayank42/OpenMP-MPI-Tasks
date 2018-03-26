@@ -23,7 +23,7 @@ int main(int argc,char **argv){
 	cout<<fixed<<setprecision(2);
 	
 	stringstream traj;
-	traj<<"trajectory_"<<num_threads<<".csv";
+	traj<<"./Log/trajectory_"<<num_threads<<".csv";
 	ofstream trajFile(traj.str().c_str());
 	if(!trajFile.is_open()){
 		cout<<"Unable to open file. Exiting."<<endl;
@@ -31,7 +31,7 @@ int main(int argc,char **argv){
 	}
 	
 	stringstream tlog;
-	tlog<<"timeLog_"<<num_threads<<".csv";
+	tlog<<"./Log/timeLog_"<<num_threads<<".csv";
 	ofstream timeLog(tlog.str().c_str());
 	if(!timeLog.is_open()){
 		cout<<"Unable to open time log. Exiting."<<endl;
@@ -40,7 +40,7 @@ int main(int argc,char **argv){
 	}
 	
 	stringstream pLog;
-	pLog<<"perfLog_"<<num_threads<<".csv";
+	pLog<<"./Log/perfLog_"<<num_threads<<".csv";
 	ofstream perfLog(pLog.str().c_str());
 	if(!perfLog.is_open()){
 		cout<<"Unable to open perf log. Exiting."<<endl;
@@ -189,7 +189,7 @@ ostream& operator <<(ostream& strm,triplet &t){
 void printStatToFile(struct read_format *rf,ofstream &perfLog,vector<uint64_t> &id){
 	static int stamp=0;
 	perfLog<<stamp<<",";
-	for(int a=0;a<rf->nr-1;++a){
+	for(unsigned int a=0;a<rf->nr-1;++a){
 		perfLog<<rf->values[a].value<<",";
 	}
 	perfLog<<rf->values[rf->nr-1].value<<endl;

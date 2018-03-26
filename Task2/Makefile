@@ -1,5 +1,5 @@
 CC=g++
-CFLAGS=
+CFLAGS=-Wall -Werror
 ifndef TARGET
 TARGET=Sim
 endif
@@ -17,7 +17,7 @@ $(TARGET): build/$(VERSION)/Sim.o
 	$(CC) $(CFLAGS) build/$(VERSION)/Sim.o -fopenmp -o bin/$(VERSION)/$(TARGET)
 build/$(VERSION)/Sim.o: include/sim.hpp src/$(VERSION)/pathGen.cpp
 	mkdir build/$(VERSION)
-	$(CC) $(CFLAGS) -Iinclude/ -c src/$(VERSION)/pathGen.cpp -o build/$(VERSION)/Sim.o
+	$(CC) $(CFLAGS) -Iinclude/ -c -fopenmp src/$(VERSION)/pathGen.cpp -o build/$(VERSION)/Sim.o
 
 run:
 	bin/$(VERSION)/./$(TARGET) $(THREADS)
@@ -25,4 +25,4 @@ run:
 clean:
 	rm -rf build/*
 	rm -rf bin/*
-	
+	rm -rf Log/*
