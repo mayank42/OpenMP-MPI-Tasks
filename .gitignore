@@ -5,7 +5,9 @@
 /Task2/Asgn3_13MA20052/*
 /Task2/Test/*
 
-#Build files,bin files,lib files
+
+#build,bin,lib,log
+/Task2/bin/*
 /Task2/build/*
 /Task2/lib/*
-/Task2/bin/*
+/Task2/log/*
