@@ -1,5 +1,12 @@
 #Simple out files
 *.out
+
 #Assignment files
 /Task2/Asgn3_13MA20052/*
 /Task2/Test/*
+
+#build,bin,lib,log
+/Task2/bin/*
+/Task2/build/*
+/Task2/lib/*
+/Task2/log/*

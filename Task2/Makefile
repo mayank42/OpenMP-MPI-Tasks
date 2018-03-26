@@ -10,13 +10,16 @@ ifndef MINOR
 MINOR=0
 endif
 VERSION=v$(MAJOR).$(MINOR)
+ifndef THREADS
+THREADS=48
+endif
 
 
 $(TARGET): build/$(VERSION)/Sim.o
-	mkdir bin/$(VERSION)
+	@mkdir bin/$(VERSION)
 	$(CC) $(CFLAGS) build/$(VERSION)/Sim.o -fopenmp -o bin/$(VERSION)/$(TARGET)
 build/$(VERSION)/Sim.o: include/sim.hpp src/$(VERSION)/pathGen.cpp
-	mkdir build/$(VERSION)
+	@mkdir build/$(VERSION)
 	$(CC) $(CFLAGS) -Iinclude/ -c -fopenmp src/$(VERSION)/pathGen.cpp -o build/$(VERSION)/Sim.o
 
 run:
@@ -25,4 +28,4 @@ run:
 clean:
 	rm -rf build/*
 	rm -rf bin/*
-	rm -rf Log/*
+	rm -rf log/$(VERSION)/*

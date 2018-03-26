@@ -15,6 +15,7 @@
 #include<stdint.h>
 #include<sys/syscall.h>
 #include<cstring>
+#include<errno.h>
 using namespace std;
 #define N 1000
 #define M 1.0f
@@ -34,9 +35,7 @@ using namespace std;
 #define L1D_R_AC 3
 #define L1D_R_MIS 4
 #define L1D_W_AC 5
-#define L1D_W_MIS 6
-#define L1I_R_AC 7
-#define L1I_R_MIS 8
+#define L1I_R_MIS 6
 
 typedef struct triplet{
 	double first;
