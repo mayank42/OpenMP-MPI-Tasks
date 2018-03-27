@@ -2,13 +2,13 @@
 Cleaning up first
 rm -rf build/*
 rm -rf bin/*
-rm -rf log/*
+rm -rf log/v0.0
 g++ -Wall -Werror -Iinclude/ -c -fopenmp src/v0.0/pathGen.cpp -o build/v0.0/Sim.o
 g++ -Wall -Werror build/v0.0/Sim.o -fopenmp -o bin/v0.0/Sim
 -------------------------------------------------------
 Simulating with 48 threads
 bin/v0.0/./Sim 48
 Percentage finished: 100.00(720000/720000)
-Total time elapsed   :   5607
+Total time elapsed   :   5615
 -------------------------------------------------------
 
