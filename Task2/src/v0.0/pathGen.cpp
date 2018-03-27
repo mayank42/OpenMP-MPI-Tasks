@@ -59,11 +59,13 @@ int main(int argc,char **argv){
 	double dist;
 	int totalRun = (int)(RUN/dt);
 	omp_set_num_threads(num_threads);
-	vector<uint64_t> id(7);
-	int statFd = init_perf(id);
-	char buf[4096];
-	struct read_format* rf = (struct read_format*) buf;
-	ioctl(statFd, PERF_EVENT_IOC_RESET, PERF_IOC_FLAG_GROUP);	  	
+	vector<uint64_t> id(5);
+	vector<int> fds = init_perf(id);
+	int statFd = fds[ACTIVE_GROUP];
+	char buf[256];
+	memset(buf,0,256);
+	struct read_format *rf = (struct read_format *)buf;
+	ioctl(statFd, PERF_EVENT_IOC_RESET, PERF_IOC_FLAG_GROUP);
 	double begin = omp_get_wtime();
 	ioctl(statFd, PERF_EVENT_IOC_ENABLE, PERF_IOC_FLAG_GROUP);
 	#pragma omp parallel for schedule(guided) shared(force) 
@@ -94,7 +96,7 @@ int main(int argc,char **argv){
 			force[b].third+=-1*f3;		
 		}
 	}
-	ioctl(statFd,PERF_EVENT_IOC_DISABLE,PERF_IOC_FLAG_GROUP);	
+	ioctl(statFd,PERF_EVENT_IOC_DISABLE,PERF_IOC_FLAG_GROUP);
 	double end = omp_get_wtime();
 	timeLog<<"0,"<<end-begin<<endl;
 	read(statFd,buf,sizeof(buf));
@@ -173,6 +175,7 @@ int main(int argc,char **argv){
 	trajFile.close();		
 	timeLog.close();
 	perfLog.close();
+	for(int a=0;a<5;a++)close(fds[a]);
 	cout<<endl;
 	return 0;
 }
@@ -189,13 +192,15 @@ ostream& operator <<(ostream& strm,triplet &t){
 void printStatToFile(struct read_format *rf,ofstream &perfLog,vector<uint64_t> &id){
 	static int stamp=0;
 	perfLog<<stamp<<",";
-	for(unsigned int a=0;a<rf->nr-1;++a){
+	int nr = (int)(rf->nr);
+	for(int a=0;a<nr-1;++a){
 		perfLog<<rf->values[a].value<<",";
 	}
-	perfLog<<rf->values[rf->nr-1].value<<endl;
+	perfLog<<rf->values[nr-1].value<<endl;
 	stamp++;
 }
-int init_perf(vector<uint64_t> &id){
+vector<int> init_perf(vector<uint64_t> &id){
+	vector<int> fds(5);
 	struct perf_event_attr *pe = (perf_event_attr*)malloc(sizeof(perf_event_attr));
 	memset(pe,0,sizeof(perf_event_attr));
 	pe->type = PERF_TYPE_HARDWARE;
@@ -205,11 +210,8 @@ int init_perf(vector<uint64_t> &id){
 	pe->exclude_kernel = 1;
 	pe->exclude_hv = 1;
 	pe->read_format = PERF_FORMAT_ID | PERF_FORMAT_GROUP;
-	int lead_fd = perf_event_open(pe,0,-1,-1,0);
-        if (lead_fd == -1) {
-        	fprintf(stderr, "Error opening leader %llx\n", pe->config);
-        	exit(EXIT_FAILURE);
-        }
+	int fd0 = perf_event_open(pe,0,-1,-1,0);
+        DEBUG(fd0,"cycle event");
 	
 	struct perf_event_attr *pe1 = (perf_event_attr*)malloc(sizeof(perf_event_attr));
 	memset(pe1,0,sizeof(perf_event_attr));
@@ -220,7 +222,8 @@ int init_perf(vector<uint64_t> &id){
 	pe1->exclude_kernel = 1;
 	pe1->exclude_hv = 1;
 	pe1->read_format = PERF_FORMAT_ID | PERF_FORMAT_GROUP;
-	int fd1 = perf_event_open(pe1,0,-1,lead_fd,0);
+	int fd1 = perf_event_open(pe1,0,-1,fd0,0);
+	DEBUG(fd1,"cache ref event");
 
 	struct perf_event_attr *pe2 = (perf_event_attr*)malloc(sizeof(perf_event_attr));
 	memset(pe2,0,sizeof(perf_event_attr));
@@ -231,7 +234,8 @@ int init_perf(vector<uint64_t> &id){
 	pe2->exclude_kernel = 1;
 	pe2->exclude_hv = 1;
 	pe2->read_format = PERF_FORMAT_ID | PERF_FORMAT_GROUP;
-	int fd2 = perf_event_open(pe2,0,-1,lead_fd,0);
+	int fd2 = perf_event_open(pe2,0,-1,fd0,0);
+	DEBUG(fd2,"cache miss event");
 
 	struct perf_event_attr *pe3 = (perf_event_attr*)malloc(sizeof(perf_event_attr));
 	memset(pe3,0,sizeof(perf_event_attr));
@@ -242,48 +246,33 @@ int init_perf(vector<uint64_t> &id){
 	pe3->exclude_kernel = 1;
 	pe3->exclude_hv = 1;
 	pe3->read_format = PERF_FORMAT_ID | PERF_FORMAT_GROUP;
-	int fd3 = perf_event_open(pe3,0,-1,lead_fd,0);
-	
+	int fd3 = perf_event_open(pe3,0,-1,-1,0);
+	DEBUG(fd3,"l1d read accesss event");
+
 	struct perf_event_attr *pe4 = (perf_event_attr*)malloc(sizeof(perf_event_attr));
 	memset(pe4,0,sizeof(perf_event_attr));
 	pe4->type = PERF_TYPE_HW_CACHE;
     	pe4->size = sizeof(struct perf_event_attr);
 	pe4->config = PERF_COUNT_HW_CACHE_L1D | PERF_COUNT_HW_CACHE_OP_READ<<8 | PERF_COUNT_HW_CACHE_RESULT_MISS<<16;
-	pe4->disabled = 1;
+	pe4->disabled = 0;
 	pe4->exclude_kernel = 1;
 	pe4->exclude_hv = 1;
 	pe4->read_format = PERF_FORMAT_ID | PERF_FORMAT_GROUP;
-	int fd4 = perf_event_open(pe4,0,-1,lead_fd,0);
+	int fd4 = perf_event_open(pe4,0,-1,fd3,0);
+	DEBUG(fd4,"l1d read miss event");
 
-	struct perf_event_attr *pe5 = (perf_event_attr*)malloc(sizeof(perf_event_attr));
-	memset(pe5,0,sizeof(perf_event_attr));
-	pe5->type = PERF_TYPE_HW_CACHE;
-    	pe5->size = sizeof(struct perf_event_attr);
-	pe5->config = PERF_COUNT_HW_CACHE_L1D | PERF_COUNT_HW_CACHE_OP_WRITE<<8 | PERF_COUNT_HW_CACHE_RESULT_ACCESS<<16;
-	pe5->disabled = 1;
-	pe5->exclude_kernel = 1;
-	pe5->exclude_hv = 1;
-	pe5->read_format = PERF_FORMAT_ID | PERF_FORMAT_GROUP;
-	int fd5 = perf_event_open(pe5,0,-1,lead_fd,0);
+	
 
-	struct perf_event_attr *pe8 = (perf_event_attr*)malloc(sizeof(perf_event_attr));
-	memset(pe8,0,sizeof(perf_event_attr));
-	pe8->type = PERF_TYPE_HW_CACHE;
-    	pe8->size = sizeof(struct perf_event_attr);
-	pe8->config = PERF_COUNT_HW_CACHE_L1I | PERF_COUNT_HW_CACHE_OP_READ<<8 | PERF_COUNT_HW_CACHE_RESULT_MISS<<16;
-	pe8->disabled = 1;
-	pe8->exclude_kernel = 1;
-	pe8->exclude_hv = 1;
-	pe8->read_format = PERF_FORMAT_ID | PERF_FORMAT_GROUP;
-	int fd8 = perf_event_open(pe8,0,-1,lead_fd,0);
-
-	ioctl(lead_fd,PERF_EVENT_IOC_ID,&id[CYCLES]);
+	ioctl(fd0,PERF_EVENT_IOC_ID,&id[CYCLES]);
 	ioctl(fd1,PERF_EVENT_IOC_ID,&id[CACHE_REF]);
 	ioctl(fd2,PERF_EVENT_IOC_ID,&id[CACHE_MIS]);
 	ioctl(fd3,PERF_EVENT_IOC_ID,&id[L1D_R_AC]);
 	ioctl(fd4,PERF_EVENT_IOC_ID,&id[L1D_R_MIS]);
-	ioctl(fd5,PERF_EVENT_IOC_ID,&id[L1D_W_AC]);
-	ioctl(fd8,PERF_EVENT_IOC_ID,&id[L1I_R_MIS]);
 	
-	return lead_fd;
+	fds[0]=fd0;
+	fds[1]=fd1;
+	fds[2]=fd2;
+	fds[3]=fd3;
+	fds[4]=fd4;
+	return fds;
 }

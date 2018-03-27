@@ -31,11 +31,17 @@ using namespace std;
 
 #define CYCLES 0
 #define CACHE_REF 1
-#define CACHE_MIS	 2
+#define CACHE_MIS 2
 #define L1D_R_AC 3
 #define L1D_R_MIS 4
-#define L1D_W_AC 5
-#define L1I_R_MIS 6
+#define PERF_GROUP1 0
+#define PERF_GROUP2 3
+#define ACTIVE_GROUP 3
+
+#define DEBUG(fd,err) if(fd==-1){ \
+cerr<<"Unable to open "<<err<<". Exiting."; \
+exit(EXIT_FAILURE); \
+}
 
 typedef struct triplet{
 	double first;
@@ -53,6 +59,6 @@ struct read_format{
         }values[];
 };
 void printStatToFile(struct read_format*,ofstream&,vector<uint64_t>&);
-int init_perf(vector<uint64_t>&);
+vector<int> init_perf(vector<uint64_t>&);
 void printToFile(vector<triplet>&,ofstream&);
 ostream& operator <<(ostream&,triplet&);
