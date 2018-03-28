@@ -1,6 +1,6 @@
 CC=g++
 CFLAGS=-Wall -Werror
-MINOR=1
+MINOR=2
 ifndef TARGET
 TARGET=Sim
 endif

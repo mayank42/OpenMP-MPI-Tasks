@@ -43,6 +43,8 @@ cerr<<"Unable to open "<<err<<". Exiting."; \
 exit(EXIT_FAILURE); \
 }
 
+#define CACHE_LINE_SIZE 64
+
 typedef struct triplet{
 	double first;
 	double second;
