@@ -5,7 +5,7 @@ timefiles = ['timeLog_16.csv','timeLog_24.csv','timeLog_32.csv','timeLog_40.csv'
 
 plt.figure(figsize=(8,8))
 plt.xlabel('Iteration number')
-plt.ylabel('Average Time taken (per 100 iteration)')
+plt.ylabel('Average Time taken (window=100)')
 for name in timefiles:
 	timeData = pd.read_csv(name,header=None,names=['Iteration','Time'])
     	print('Plotting   :   '+name)
