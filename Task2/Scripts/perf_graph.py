@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from sys import argv
 
-perfs = argv[1:]
+perfs = argv[2:]
 plt.figure(figsize=(8,8))
 plt.xlabel('Iteration number')
 plt.ylabel('Average Hit/Ref ratio (window=100)')
@@ -19,8 +19,8 @@ for ver in perfs:
 	plt.plot(rat.rolling(window=100).mean().values)
 
 if len(perfs)==1:
-	plt.savefig('./Graphs/l1dcache_'+argv[1]+'.png')
+	plt.savefig('./Graphs/l1dcache_'+argv[2]+'.png')
 else:
 	plt.legend(perfs)
-	plt.savefig('./Graphs/l1dcache_comp.png')
+	plt.savefig('./Graphs/l1dcache_comp_'+argv[1]+'.png')
 

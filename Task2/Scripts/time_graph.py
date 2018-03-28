@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from sys import argv
 import numpy as np
 
-times = argv[2:]
+times = argv[3:]
 
 plt.figure(figsize=(8,8))
 plt.xlabel('Iteration number')
@@ -18,9 +18,9 @@ for name in times:
 	plt.plot(vcut(timeData['Time'].rolling(window=100).mean().values))
 
 if len(times)==1:
-	plt.savefig('./Graphs/time_'+argv[2]+'.png')
+	plt.savefig('./Graphs/time_'+argv[3]+'.png')
 else:
 	plt.legend(times)
-	plt.savefig('./Graphs/time_comp.png')
+	plt.savefig('./Graphs/time_comp_'+argv[2]+'.png')
 
 
