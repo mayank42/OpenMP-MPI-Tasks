@@ -11,9 +11,8 @@ for i in range(len(traj1)):
 	diff = diff**2
 	diff = diff.mean()
 	diff = sqrt(diff)
-	diff = diff*(10**-14)
 	err = err + diff
 err = err/(len(traj1))
-print('Total error = '+str(err))
+print('Total error = '+str(err)+' e-14')
 		
 

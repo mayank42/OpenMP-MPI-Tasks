@@ -9,6 +9,6 @@ g++ -Wall -Werror build/v0.1/Sim.o -fopenmp -o bin/v0.1/Sim
 Simulating with 48 threads
 bin/v0.1/./Sim 48
 Percentage finished: 100.00(720000/720000)
-Total time elapsed   :   5651
+Total time elapsed   :   5536
 -------------------------------------------------------
 
