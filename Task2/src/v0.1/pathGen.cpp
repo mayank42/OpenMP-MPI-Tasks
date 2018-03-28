@@ -101,24 +101,16 @@ int main(int argc,char **argv){
 	timeLog<<"0,"<<end-begin<<endl;
 	read(statFd,buf,sizeof(buf));
 	printStatToFile(rf,perfLog,id);
-	int run;
-	
-	for(run=0;run<totalRun;++run){
-		#pragma omp parallel default(shared)
-		{
-		#pragma omp single
-		{
+	for(int run=0;run<totalRun;++run){
 		if(run%1000==0)printToFile(position,trajFile);
 	  	ioctl(statFd, PERF_EVENT_IOC_RESET, PERF_IOC_FLAG_GROUP);
 		begin = omp_get_wtime();
 	  	ioctl(statFd, PERF_EVENT_IOC_ENABLE, PERF_IOC_FLAG_GROUP);
-		}
-		#pragma omp for schedule(guided)
-		for(int a=0;a<N;++a){
+		#pragma omp parallel for schedule(guided) shared(position,velocity,force)
+		for(int a=0;a<N;++a){	
 			velocity[a].first+=force[a].first*dt/(2*M);
 			velocity[a].second+=force[a].second*dt/(2*M);
 			velocity[a].third+=force[a].third*dt/(2*M);
-
 			position[a].first+=velocity[a].first*dt;
 			while(!(position[a].first>=0 && position[a].first<=XMAX)){
 				if(position[a].first>XMAX)position[a].first = 2*XMAX-position[a].first;
@@ -135,8 +127,9 @@ int main(int argc,char **argv){
 				else if(position[a].third<0)position[a].third = -1*position[a].third;
 			}
 			force[a].first=force[a].second=force[a].third=0.0;
+
 		}
-		#pragma omp for schedule(guided) private(r,dist,f,f1,f2,f3) collapse(2)
+		#pragma omp parallel for schedule(guided) shared(position,force) private(r,dist,f,f1,f2,f3) collapse(2)
 		for(int a=0;a<N;++a){
 			for(int b=0;b<N;++b){
 				if(b<=a)continue;
@@ -162,14 +155,12 @@ int main(int argc,char **argv){
 				force[b].third+=-1*f3;
 			}
 		}
-		#pragma omp parallel for schedule(guided)
+		#pragma omp parallel for schedule(guided) shared(velocity,force)
 		for(int a=0;a<N;++a){
 			velocity[a].first+=force[a].first*dt/(2*M);
 			velocity[a].second+=force[a].second*dt/(2*M);
 			velocity[a].third+=force[a].third*dt/(2*M);
 		}
-		#pragma omp single
-		{
 		ioctl(statFd,PERF_EVENT_IOC_DISABLE,PERF_IOC_FLAG_GROUP);	
 		end = omp_get_wtime();
 		read(statFd,buf,sizeof(buf));
@@ -177,8 +168,6 @@ int main(int argc,char **argv){
 		cout<<"Percentage finished: "<<(run+1)*100.0/totalRun<<"("<<run+1<<"/"<<totalRun<<")\r";
 		timeLog<<run+1<<","<<end-begin<<endl;
 		cout.flush();
-		}
-	}
 	}
 	trajFile.close();		
 	timeLog.close();
