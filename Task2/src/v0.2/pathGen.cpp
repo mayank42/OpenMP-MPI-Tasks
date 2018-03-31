@@ -102,73 +102,67 @@ int main(int argc,char **argv){
 	read(statFd,buf,sizeof(buf));
 	printStatToFile(rf,perfLog,id);
 	for(int run=0;run<totalRun;++run){
+		#pragma omp parallel shared(position,velocity,force) private(r,dist,f,f1,f2,f3)
+		{
+		#pragma omp master
+		{
 		if(run%1000==0)printToFile(position,trajFile);
 	  	ioctl(statFd, PERF_EVENT_IOC_RESET, PERF_IOC_FLAG_GROUP);
 		begin = omp_get_wtime();
 	  	ioctl(statFd, PERF_EVENT_IOC_ENABLE, PERF_IOC_FLAG_GROUP);
-		#pragma omp parallel for schedule(guided) shared(position,velocity,force)
-		for(int a=0;a<N/CACHE_LINE_SIZE+1;++a){
-			int line_block = a*CACHE_LINE_SIZE;
-			int line_block_end = min(N,line_block+CACHE_LINE_SIZE);
-			for(int b=line_block;b<line_block_end;++b){
-				velocity[b].first+=force[b].first*dt/(2*M);
-				velocity[b].second+=force[b].second*dt/(2*M);
-				velocity[b].third+=force[b].third*dt/(2*M);
-				position[b].first+=velocity[b].first*dt;
-				while(!(position[b].first>=0 && position[b].first<=XMAX)){
-					if(position[b].first>XMAX)position[b].first = 2*XMAX-position[b].first;
-					else if(position[b].first<0)position[b].first = -1*position[b].first;
-				}
-				position[b].second+=velocity[b].second*dt;
-				while(!(position[b].second>=0 && position[b].second<=YMAX)){
-					if(position[b].second>YMAX)position[b].second = 2*YMAX-position[b].second;
-					else if(position[b].second<0)position[b].second = -1*position[b].second;
-				}
-				position[b].third+=velocity[b].third*dt;
-				while(!(position[b].third>=0 && position[b].third<=ZMAX)){
-					if(position[b].third>ZMAX)position[b].third = 2*ZMAX-position[b].third;
-					else if(position[b].third<0)position[b].third = -1*position[b].third;
-				}
-				force[b].first=force[b].second=force[b].third=0.0;
+		}
+		#pragma omp barrier
+		#pragma omp for schedule(guided,CACHE_LINE_SIZE) 
+		for(int a=0;a<N;++a){	
+			velocity[a].first+=force[a].first*dt/(2*M);
+			velocity[a].second+=force[a].second*dt/(2*M);
+			velocity[a].third+=force[a].third*dt/(2*M);
+			position[a].first+=velocity[a].first*dt;
+			while(!(position[a].first>=0 && position[a].first<=XMAX)){
+				if(position[a].first>XMAX)position[a].first = 2*XMAX-position[a].first;
+				else if(position[a].first<0)position[a].first = -1*position[a].first;
 			}
+			position[a].second+=velocity[a].second*dt;
+			while(!(position[a].second>=0 && position[a].second<=YMAX)){
+				if(position[a].second>YMAX)position[a].second = 2*YMAX-position[a].second;
+				else if(position[a].second<0)position[a].second = -1*position[a].second;
+			}
+			position[a].third+=velocity[a].third*dt;
+			while(!(position[a].third>=0 && position[a].third<=ZMAX)){
+				if(position[a].third>ZMAX)position[a].third = 2*ZMAX-position[a].third;
+				else if(position[a].third<0)position[a].third = -1*position[a].third;
+			}
+			force[a].first=force[a].second=force[a].third=0.0;
 
 		}
-		#pragma omp parallel for schedule(guided,CACHE_LINE_SIZE) shared(position,force) private(r,dist,f,f1,f2,f3) collapse(2)
+		#pragma omp for schedule(guided,CACHE_LINE_SIZE) collapse(2)
 		for(int a=0;a<N;++a){
 			for(int b=0;b<N;++b){
-				if(b<=a)continue;
-				r.first = position[b].first - position[a].first;
-				r.second = position[b].second - position[a].second;
-				r.third = position[b].third - position[a].third;
+				if(b==a)continue;
+				r.first = position[a].first - position[b].first;
+				r.second = position[a].second - position[b].second;
+				r.third = position[a].third - position[b].third;
 				dist = sqrt(r.first*r.first+r.second*r.second+r.third*r.third);
 				f = G*M*M/dist;
 				f1 = f*r.first/dist;
 				f2 = f*r.second/dist;
 				f3 = f*r.third/dist;
 				#pragma omp atomic
-				force[a].first+=f1;
+				force[b].first+=f1;
 				#pragma omp atomic
-				force[a].second+=f2;
+				force[b].second+=f2;
 				#pragma omp atomic
-				force[a].third+=f3;
-				#pragma omp atomic
-				force[b].first+=-1*f1;
-				#pragma omp atomic
-				force[b].second+=-1*f2;
-				#pragma omp atomic
-				force[b].third+=-1*f3;
+				force[b].third+=f3;
 			}
 		}
-		#pragma omp parallel for schedule(guided) shared(velocity,force)
-		for(int a=0;a<N/CACHE_LINE_SIZE+1;++a){
-			int line_block = a*CACHE_LINE_SIZE;
-			int line_block_end = min(N,line_block+CACHE_LINE_SIZE);
-			for(int b=line_block;b<line_block_end;++b){
-				velocity[b].first+=force[b].first*dt/(2*M);
-				velocity[b].second+=force[b].second*dt/(2*M);
-				velocity[b].third+=force[b].third*dt/(2*M);
-			}
+		#pragma omp for schedule(guided,CACHE_LINE_SIZE) 
+		for(int a=0;a<N;++a){
+			velocity[a].first+=force[a].first*dt/(2*M);
+			velocity[a].second+=force[a].second*dt/(2*M);
+			velocity[a].third+=force[a].third*dt/(2*M);
 		}
+		#pragma omp master
+		{
 		ioctl(statFd,PERF_EVENT_IOC_DISABLE,PERF_IOC_FLAG_GROUP);	
 		end = omp_get_wtime();
 		read(statFd,buf,sizeof(buf));
@@ -176,6 +170,8 @@ int main(int argc,char **argv){
 		cout<<"Percentage finished: "<<(run+1)*100.0/totalRun<<"("<<run+1<<"/"<<totalRun<<")\r";
 		timeLog<<run+1<<","<<end-begin<<endl;
 		cout.flush();
+		}
+		}
 	}
 	trajFile.close();		
 	timeLog.close();

@@ -1,4 +1,4 @@
-[13MA20052@orc-cluster Task2]$ ./run.sh 
+[13MA20052@orc-cluster Task2]$ ./run.sh
 Cleaning up first
 rm -rf build/*
 rm -rf bin/*
@@ -9,6 +9,6 @@ g++ -Wall -Werror build/v0.2/Sim.o -fopenmp -o bin/v0.2/Sim
 Simulating with 48 threads
 bin/v0.2/./Sim 48
 Percentage finished: 100.00(720000/720000)
-Total time elapsed   :   5282
+Total time elapsed   :   5243
 -------------------------------------------------------
 
