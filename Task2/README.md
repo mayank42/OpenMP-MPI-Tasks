@@ -24,7 +24,7 @@ This is part of an experiment with optimizing OpenMP program on solving the N-bo
    <img src="https://github.com/mayank42/OpenMP-MPI-Tasks/blob/master/Task2/Graphs/time_comp_2.png" width="600" height="500" />  
    Below is a comparision of L1 data cache hit ratio:  
    <img src="https://github.com/mayank42/OpenMP-MPI-Tasks/blob/master/Task2/Graphs/l1dcache_comp_2.png" width="600" height="500" />      
-   Suprisingly the cache miss has increased while the cpu time has decreased. This leaves a heavy room for improvement. Perhaps rather than stopping false sharing we've just decreased some overhead for openmp threading.
+   The low cache hit ratio is rather due to better load balancing among threads ( low cache access ). Analysis of cache misses and cache accesses seperately showed that misses have remained same but the accesses have gone down.
    
 * Step 4: TODO   
 
