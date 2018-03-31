@@ -20,10 +20,11 @@ This is part of an experiment with optimizing OpenMP program on solving the N-bo
    
 * Step 3: cache line false sharing ( v0.2 )  
 
-   In this version I have tried to reduce the false sharing of data among threads by unrolling loops by the size of cache line which is 64 bytes on the system I am working. In the nested loop where it wasn't possible to unroll I have made the minimum guided scheduling chunk size to be that of cache line size. Below is the time comparision graph:  
+   In this version I have tried to reduce the false sharing of data among threads by specifying the minimum chunk size of scheduling the for loop. The minimum chunk size was chosen so that the data required in those many iterations fit into an integral number of cache line - here 64. Below is the time comparision graph:  
    <img src="https://github.com/mayank42/OpenMP-MPI-Tasks/blob/master/Task2/Graphs/time_comp_2.png" width="600" height="500" />  
    Below is a comparision of L1 data cache hit ratio:  
-   <img src="https://github.com/mayank42/OpenMP-MPI-Tasks/blob/master/Task2/Graphs/l1dcache_comp_2.png" width="600" height="500" />    
+   <img src="https://github.com/mayank42/OpenMP-MPI-Tasks/blob/master/Task2/Graphs/l1dcache_comp_2.png" width="600" height="500" />      
+   Suprisingly the cache miss has increased while the cpu time has decreased. This leaves a heavy room for improvement. Perhaps rather than stopping false sharing we've just decreased some overhead for openmp threading.
    
-* Step 3: TODO   
+* Step 4: TODO   
 
