@@ -5,9 +5,9 @@
 /Task2/Asgn3_13MA20052/*
 
 
-#build,bin,lib,log,spike
+#build,bin,lib,log/perfstack,spike
 /Task2/bin/*
 /Task2/build/*
 /Task2/lib/*
-/Task2/log/*
+/Task2/log/perfstack/*
 /Task2/spike/*
