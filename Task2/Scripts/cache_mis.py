@@ -6,7 +6,7 @@ from sys import argv
 perfs = argv[2:]
 plt.figure(figsize=(8,8))
 plt.xlabel('Iteration number')
-plt.ylabel('Average Hit/Ref ratio (window=100)')
+plt.ylabel('Average cache miss (window=100)')
 plt.title('L1 Data Cache Stats')
 
 for ver in perfs:
