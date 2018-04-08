@@ -1,5 +1,5 @@
 CC=g++
-CFLAGS=-Wall -Werror
+CFLAGS=-Wall -Werror -g
 MINOR=2
 ifndef TARGET
 TARGET=Sim

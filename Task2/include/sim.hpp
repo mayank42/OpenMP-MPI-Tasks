@@ -17,7 +17,7 @@
 #include<cstring>
 #include<errno.h>
 using namespace std;
-#define N 1000
+#define N 10
 #define M 1.0f
 #define R 0.5f
 #define G 6.67*1e-11f
